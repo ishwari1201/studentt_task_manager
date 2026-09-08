@@ -1,0 +1,13 @@
+{
+  "name": "devops-task-manager",
+  "version": "1.0.0",
+  "description": "Student Task Manager - DevOps Jenkins Assignment",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

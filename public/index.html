@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Task Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 0 20px;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    li span {
+      font-size: 16px;
+      color: #333;
+    }
+
+    li button {
+      background-color: #e53935;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    li button:hover {
+      background-color: #c62828;
+    }
+
+    #message {
+      text-align: center;
+      color: #888;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Student Task Manager</h1>
+
+  <div class="input-area">
+    <input type="text" id="taskInput" placeholder="Enter a task..." />
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <ul id="taskList"></ul>
+  <p id="message">No tasks yet. Add one above!</p>
+
+  <script>
+    // Load tasks on page load
+    window.onload = loadTasks;
+
+    async function loadTasks() {
+      const res = await fetch('/tasks');
+      const tasks = await res.json();
+      renderTasks(tasks);
+    }
+
+    async function addTask() {
+      const input = document.getElementById('taskInput');
+      const taskText = input.value.trim();
+      if (!taskText) return;
+
+      const res = await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: taskText })
+      });
+
+      if (res.ok) {
+        input.value = '';
+        loadTasks();
+      }
+    }
+
+    async function deleteTask(id) {
+      await fetch(`/tasks/${id}`, { method: 'DELETE' });
+      loadTasks();
+    }
+
+    function renderTasks(tasks) {
+      const list = document.getElementById('taskList');
+      const message = document.getElementById('message');
+      list.innerHTML = '';
+
+      if (tasks.length === 0) {
+        message.style.display = 'block';
+        return;
+      }
+
+      message.style.display = 'none';
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${task.text}</span>
+          <button onclick="deleteTask(${task.id})">Delete</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // Allow pressing Enter to add a task
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('taskInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTask();
+      });
+    });
+  </script>
+
+</body>
+</html>
